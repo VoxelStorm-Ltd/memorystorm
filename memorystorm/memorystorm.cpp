@@ -58,7 +58,7 @@ uint64_t get_physical_total() {
     return result;
   #elif defined(PLATFORM_MACOS)
     int64_t result;
-    length = sizeof(result);
+    size_t length = sizeof(result);
     int mib[2];
     mib[0] = CTL_HW;
     mib[1] = HW_MEMSIZE;
@@ -106,7 +106,7 @@ uint64_t get_physical_usage() {
     while(fgets(line, 128, file) != NULL) {
       if(strncmp(line, "VmRSS:", 6) == 0) {
         char *templine = line;
-        unsigned int const length = strlen(templine);
+        size_t const length = strlen(templine);
         while(*templine < '0' || *templine > '9') {
           templine++;
         }
@@ -120,10 +120,10 @@ uint64_t get_physical_usage() {
   #elif defined(PLATFORM_MACOS)
     struct task_basic_info info;
     mach_msg_type_number_t info_count = TASK_BASIC_INFO_COUNT;
-    if(task_info(mach_task_self(), TASK_BASIC_INFO, static_cast<task_info_t>(&info), &info_count) != KERN_SUCCESS) {
+    if(task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &info_count) != KERN_SUCCESS) {
       return 0;
     }
-    return t_info.resident_size;
+    return info.resident_size;
   #endif // defined
 }
 
@@ -142,8 +142,8 @@ uint64_t get_virtual_total() {
     result *= info.mem_unit;
     return result;
   #elif defined(PLATFORM_MACOS)
-    xsw_usage xsu = {0};
-    uint64_t size = sizeof(xsu);
+    xsw_usage xsu = {0, 0, 0, 0, 0};
+    size_t size = sizeof(xsu);
     if(sysctlbyname("vm.swapusage", &xsu, &size, NULL, 0) != 0) {
       perror("unable to get swap usage by calling sysctlbyname(\"vm.swapusage\",...)");
     }
@@ -163,9 +163,10 @@ uint64_t get_virtual_available() {
     uint64_t result = info.freeram;
     result += info.freeswap;                                                    // Add other values in next statement to avoid int overflow on right hand side...
     result *= info.mem_unit;
+    return result;
   #elif defined(PLATFORM_MACOS)
-    xsw_usage xsu = {0};
-    uint64_t size = sizeof(xsu);
+    xsw_usage xsu = {0, 0, 0, 0, 0};
+    size_t size = sizeof(xsu);
     if(sysctlbyname("vm.swapusage", &xsu, &size, NULL, 0) != 0) {
       perror("unable to get swap usage by calling sysctlbyname(\"vm.swapusage\",...)");
     }
@@ -187,7 +188,7 @@ uint64_t get_virtual_usage() {
     while(fgets(line, 128, file) != NULL) {
       if(strncmp(line, "VmSize:", 7) == 0) {
         char *templine = line;
-        unsigned int const length = strlen(templine);
+        size_t const length = strlen(templine);
         while(*templine < '0' || *templine > '9') {
           templine++;
         }
@@ -200,7 +201,7 @@ uint64_t get_virtual_usage() {
   #elif defined(PLATFORM_MACOS)
     struct task_basic_info info;
     mach_msg_type_number_t info_count = TASK_BASIC_INFO_COUNT;
-    if(task_info(mach_task_self(), TASK_BASIC_INFO, static_cast<task_info_t>(&info), &info_count) != KERN_SUCCESS) {
+    if(task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &info_count) != KERN_SUCCESS) {
       return 0;
     }
     return info.virtual_size;
