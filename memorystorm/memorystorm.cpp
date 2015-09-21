@@ -108,7 +108,7 @@ uint64_t get_physical_usage() {
         char *templine = line;
         size_t const length = strlen(templine);
         while(*templine < '0' || *templine > '9') {
-          templine++;
+          ++templine;
         }
         templine[length - 3] = '\0';
         result = atoi(templine) * 1024;                                         // value is kilobytes
@@ -190,7 +190,7 @@ uint64_t get_virtual_usage() {
         char *templine = line;
         size_t const length = strlen(templine);
         while(*templine < '0' || *templine > '9') {
-          templine++;
+          ++templine;
         }
         templine[length - 3] = '\0';
         result = atoi(templine) * 1024;                                         // value is kilobytes
