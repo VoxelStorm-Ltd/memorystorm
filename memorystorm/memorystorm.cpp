@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include "platform_defines.h"
+#include "cast_if_required.h"
 #if defined(PLATFORM_WINDOWS)
   #include <windows.h>
   #include <psapi.h>
@@ -45,7 +46,7 @@ uint64_t get_physical_total() {
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
     GlobalMemoryStatusEx(&status);
-    return static_cast<uint64_t>(status.ullTotalPhys);                          // physical memory
+    return cast_if_required<uint64_t>(status.ullTotalPhys);                     // physical memory
   #elif defined(PLATFORM_LINUX)
     //uint64_t pages = sysconf(_SC_PHYS_PAGES);
     //uint64_t page_size = sysconf(_SC_PAGE_SIZE);
@@ -72,7 +73,7 @@ uint64_t get_physical_available() {
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
     GlobalMemoryStatusEx(&status);
-    return static_cast<uint64_t>(status.ullAvailPhys);                          // physical memory
+    return cast_if_required<uint64_t>(status.ullAvailPhys);                     // physical memory
   #elif defined(PLATFORM_LINUX)
     struct sysinfo info;
     sysinfo(&info);
@@ -133,7 +134,7 @@ uint64_t get_virtual_total() {
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
     GlobalMemoryStatusEx(&status);
-    return static_cast<uint64_t>(status.ullTotalPageFile);                      // total virtual memory (including swapfiles)
+    return cast_if_required<uint64_t>(status.ullTotalPageFile);                 // total virtual memory (including swapfiles)
   #elif defined(PLATFORM_LINUX)
     struct sysinfo info;
     sysinfo(&info);
@@ -156,7 +157,7 @@ uint64_t get_virtual_available() {
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
     GlobalMemoryStatusEx(&status);
-    return static_cast<uint64_t>(status.ullAvailPageFile);                      // available virtual memory (including swapfiles)
+    return cast_if_required<uint64_t>(status.ullAvailPageFile);                 // available virtual memory (including swapfiles)
   #elif defined(PLATFORM_LINUX)
     struct sysinfo info;
     sysinfo(&info);
@@ -212,10 +213,10 @@ std::string human_readable(uint64_t amount) {
   /// Helper function to convert a size in bytes to a human readable size
   std::stringstream ss;
   uint64_t constexpr kilobyte{1'024};
-  uint64_t constexpr megabyte{1'048'576};
-  uint64_t constexpr gigabyte{1'073'741'824};
-  uint64_t constexpr terabyte{1'099'511'627'776};
-  uint64_t constexpr petabyte{1'125'899'906'842'624};
+  uint64_t constexpr megabyte{kilobyte * 1'024};
+  uint64_t constexpr gigabyte{megabyte * 1'024};
+  uint64_t constexpr terabyte{gigabyte * 1'024};
+  uint64_t constexpr petabyte{terabyte * 1'024};
   if(amount < kilobyte) {
     ss << amount << "B";
   } else if(amount < megabyte) {
