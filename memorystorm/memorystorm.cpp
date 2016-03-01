@@ -20,6 +20,8 @@
   #include <mach/mach_init.h>
   #include <mach/mach_host.h>
   // TODO: check if any of these are redundant
+#else
+  #error "Compilation platform could not be determined.  Make sure platform_defines.h is included and up to date."
 #endif // defined
 
 namespace memorystorm {
