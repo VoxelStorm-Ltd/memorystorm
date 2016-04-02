@@ -114,7 +114,7 @@ uint64_t get_physical_usage() {
           ++templine;
         }
         templine[length - 3] = '\0';
-        result = atoi(templine) * 1024;                                         // value is kilobytes
+        result = std::atoll(templine) * uint64_t(1024);                         // value is kilobytes
         break;
       }
     }
@@ -196,7 +196,7 @@ uint64_t get_virtual_usage() {
           ++templine;
         }
         templine[length - 3] = '\0';
-        result = atoi(templine) * 1024;                                         // value is kilobytes
+        result = std::atoll(templine) * uint64_t(1024);                         // value is kilobytes
       }
     }
     fclose(file);
