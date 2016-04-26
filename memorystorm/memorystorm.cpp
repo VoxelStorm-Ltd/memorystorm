@@ -2,10 +2,10 @@
 #include <sstream>
 #include <iostream>
 #include "platform_defines.h"
-#include "cast_if_required.h"
 #if defined(PLATFORM_WINDOWS)
   #include <windows.h>
   #include <psapi.h>
+  #include "cast_if_required.h"
 #elif defined(PLATFORM_LINUX)
   #include <cstring>
   #include <sys/resource.h>
