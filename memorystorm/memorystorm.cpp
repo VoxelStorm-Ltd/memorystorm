@@ -12,14 +12,13 @@
   #include <sys/sysinfo.h>
   #include <unistd.h>
 #elif defined(PLATFORM_MACOS)
-  #include <sys/types.h>
+  //#include <sys/types.h>
   #include <sys/sysctl.h>
-  #include <mach/vm_statistics.h>
+  //#include <mach/vm_statistics.h>
   #include <mach/mach.h>
-  #include <mach/mach_types.h>
-  #include <mach/mach_init.h>
-  #include <mach/mach_host.h>
-  // TODO: check if any of these are redundant
+  //#include <mach/mach_types.h>
+  //#include <mach/mach_init.h>
+  //#include <mach/mach_host.h>
 #else
   #error "Compilation platform could not be determined.  Make sure platform_defines.h is included and up to date."
 #endif // defined
@@ -32,13 +31,10 @@ uint64_t get_stack_available() {
     MEMORY_BASIC_INFORMATION mbi;                                               // page range
     VirtualQuery((PVOID)&mbi, &mbi, sizeof(mbi));                               // get range
     return (UINT_PTR)&mbi - (UINT_PTR)mbi.AllocationBase;                       // subtract from top (stack grows downward on win)
-  #elif defined(PLATFORM_LINUX)
+  #elif defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)
     rlimit limit;                                                               // hard limit and soft limit
     getrlimit(RLIMIT_STACK, &limit);                                            // stack size availability
     return std::min(limit.rlim_cur, limit.rlim_max);                            // return the smallest of the two
-  #elif defined(PLATFORM_MACOS)
-    // TODO: OS X
-    return 0;
   #endif // defined
 }
 
