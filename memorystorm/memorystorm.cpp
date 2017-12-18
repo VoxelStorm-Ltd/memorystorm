@@ -1,6 +1,7 @@
 #include "memorystorm.h"
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 #include "platform_defines.h"
 #if defined(PLATFORM_WINDOWS)
   #include <windows.h>
@@ -217,14 +218,24 @@ std::string human_readable(uint64_t amount) {
   uint64_t constexpr const petabyte{terabyte * 1'024};
   if(amount < kilobyte) {
     ss << amount << "B";
+  } else if(amount < kilobyte * 10) {
+    ss << std::setprecision(2) << static_cast<float>(amount) / kilobyte << "KB";
   } else if(amount < megabyte) {
     ss << amount / kilobyte << "KB";
+  } else if(amount < megabyte * 10) {
+    ss << std::setprecision(2) << static_cast<float>(amount / kilobyte) / kilobyte << "MB";
   } else if(amount < gigabyte) {
     ss << amount / megabyte << "MB";
+  } else if(amount < gigabyte * 10) {
+    ss << std::setprecision(2) << static_cast<float>(amount / megabyte) / kilobyte << "GB";
   } else if(amount < terabyte) {
     ss << amount / gigabyte << "GB";
+  } else if(amount < terabyte * 10) {
+    ss << std::setprecision(2) << static_cast<float>(amount / gigabyte) / kilobyte << "TB";
   } else if(amount < petabyte) {
     ss << amount / terabyte << "TB";
+  } else if(amount < petabyte * 10) {
+    ss << std::setprecision(2) << static_cast<float>(amount / terabyte) / kilobyte << "PB";
   } else {
     ss << amount / petabyte << "PB";
   }
