@@ -33,9 +33,13 @@ uint64_t get_stack_available() {
     VirtualQuery((PVOID)&mbi, &mbi, sizeof(mbi));                               // get range
     return (UINT_PTR)&mbi - (UINT_PTR)mbi.AllocationBase;                       // subtract from top (stack grows downward on win)
   #elif defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)
-    rlimit limit;                                                               // hard limit and soft limit
-    getrlimit(RLIMIT_STACK, &limit);                                            // stack size availability
-    return std::min(limit.rlim_cur, limit.rlim_max);                            // return the smallest of the two
+    #if defined(__EMSCRIPTEN__)
+      return 0;
+    #else
+      rlimit limit;                                                             // hard limit and soft limit
+      getrlimit(RLIMIT_STACK, &limit);                                          // stack size availability
+      return std::min(limit.rlim_cur, limit.rlim_max);                          // return the smallest of the two
+    #endif // defined
   #endif // defined
 }
 
@@ -47,15 +51,19 @@ uint64_t get_physical_total() {
     GlobalMemoryStatusEx(&status);
     return cast_if_required<uint64_t>(status.ullTotalPhys);                     // physical memory
   #elif defined(PLATFORM_LINUX)
-    //uint64_t pages = sysconf(_SC_PHYS_PAGES);
-    //uint64_t page_size = sysconf(_SC_PAGE_SIZE);
-    //return pages * page_size;
-    // alternative:
-    struct sysinfo info;
-    sysinfo(&info);
-    uint64_t result = info.totalram;
-    result *= info.mem_unit;                                                    // don't collapse this to avoid int overflow on rhs
-    return result;
+    #if defined(__EMSCRIPTEN__)
+      return 0;
+    #else
+      //uint64_t pages = sysconf(_SC_PHYS_PAGES);
+      //uint64_t page_size = sysconf(_SC_PAGE_SIZE);
+      //return pages * page_size;
+      // alternative:
+      struct sysinfo info;
+      sysinfo(&info);
+      uint64_t result = info.totalram;
+      result *= info.mem_unit;                                                  // don't collapse this to avoid int overflow on rhs
+      return result;
+    #endif // defined
   #elif defined(PLATFORM_MACOS)
     int64_t result;
     size_t length = sizeof(result);
@@ -74,11 +82,15 @@ uint64_t get_physical_available() {
     GlobalMemoryStatusEx(&status);
     return cast_if_required<uint64_t>(status.ullAvailPhys);                     // physical memory
   #elif defined(PLATFORM_LINUX)
-    struct sysinfo info;
-    sysinfo(&info);
-    uint64_t totalVirtualMem = info.freeram;
-    totalVirtualMem *= info.mem_unit;                                           // don't collapse this to avoid int overflow on rhs
-    return totalVirtualMem;
+    #if defined(__EMSCRIPTEN__)
+      return 0;
+    #else
+      struct sysinfo info;
+      sysinfo(&info);
+      uint64_t totalVirtualMem = info.freeram;
+      totalVirtualMem *= info.mem_unit;                                         // don't collapse this to avoid int overflow on rhs
+      return totalVirtualMem;
+    #endif // defined
   #elif defined(PLATFORM_MACOS)
     mach_port_t mach_port;
     mach_port = mach_host_self();
@@ -100,23 +112,27 @@ uint64_t get_physical_usage() {
     GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters));
     return counters.WorkingSetSize;                                             // physical memory used
   #elif defined(PLATFORM_LINUX)
-    FILE *file = fopen("/proc/self/status", "r");
-    uint64_t result = 0;
-    char line[128];
-    while(fgets(line, 128, file) != NULL) {
-      if(strncmp(line, "VmRSS:", 6) == 0) {
-        char *templine = line;
-        size_t const length = strlen(templine);
-        while(*templine < '0' || *templine > '9') {
-          ++templine;
+    #if defined(__EMSCRIPTEN__)
+      return 0;
+    #else
+      FILE *file = fopen("/proc/self/status", "r");
+      uint64_t result = 0;
+      char line[128];
+      while(fgets(line, 128, file) != NULL) {
+        if(strncmp(line, "VmRSS:", 6) == 0) {
+          char *templine = line;
+          size_t const length = strlen(templine);
+          while(*templine < '0' || *templine > '9') {
+            ++templine;
+          }
+          templine[length - 3] = '\0';
+          result = static_cast<uint64_t>(std::atoll(templine)) * uint64_t{1024u}; // value is kilobytes
+          break;
         }
-        templine[length - 3] = '\0';
-        result = std::atoll(templine) * uint64_t(1024);                         // value is kilobytes
-        break;
       }
-    }
-    fclose(file);
-    return result;
+      fclose(file);
+      return result;
+    #endif // defined
   #elif defined(PLATFORM_MACOS)
     struct task_basic_info info;
     mach_msg_type_number_t info_count = TASK_BASIC_INFO_COUNT;
@@ -135,12 +151,16 @@ uint64_t get_virtual_total() {
     GlobalMemoryStatusEx(&status);
     return cast_if_required<uint64_t>(status.ullTotalPageFile);                 // total virtual memory (including swapfiles)
   #elif defined(PLATFORM_LINUX)
-    struct sysinfo info;
-    sysinfo(&info);
-    uint64_t result = info.totalram;
-    result += info.totalswap;                                                   // Add other values in next statement to avoid int overflow on right hand side...
-    result *= info.mem_unit;
-    return result;
+    #if defined(__EMSCRIPTEN__)
+      return 0;
+    #else
+      struct sysinfo info;
+      sysinfo(&info);
+      uint64_t result = info.totalram;
+      result += info.totalswap;                                                 // Add other values in next statement to avoid int overflow on right hand side...
+      result *= info.mem_unit;
+      return result;
+    #endif // defined
   #elif defined(PLATFORM_MACOS)
     xsw_usage xsu = {0, 0, 0, 0, 0};
     size_t size = sizeof(xsu);
@@ -158,12 +178,16 @@ uint64_t get_virtual_available() {
     GlobalMemoryStatusEx(&status);
     return cast_if_required<uint64_t>(status.ullAvailPageFile);                 // available virtual memory (including swapfiles)
   #elif defined(PLATFORM_LINUX)
-    struct sysinfo info;
-    sysinfo(&info);
-    uint64_t result = info.freeram;
-    result += info.freeswap;                                                    // Add other values in next statement to avoid int overflow on right hand side...
-    result *= info.mem_unit;
-    return result;
+    #if defined(__EMSCRIPTEN__)
+      return 0;
+    #else
+      struct sysinfo info;
+      sysinfo(&info);
+      uint64_t result = info.freeram;
+      result += info.freeswap;                                                  // Add other values in next statement to avoid int overflow on right hand side...
+      result *= info.mem_unit;
+      return result;
+    #endif // defined
   #elif defined(PLATFORM_MACOS)
     xsw_usage xsu = {0, 0, 0, 0, 0};
     size_t size = sizeof(xsu);
@@ -182,22 +206,26 @@ uint64_t get_virtual_usage() {
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&counters, sizeof(counters));
     return counters.PrivateUsage;                                               // virtual memory used
   #elif defined(PLATFORM_LINUX)
-    FILE *file = fopen("/proc/self/status", "r");
-    uint64_t result = 0;
-    char line[128];
-    while(fgets(line, 128, file) != NULL) {
-      if(strncmp(line, "VmSize:", 7) == 0) {
-        char *templine = line;
-        size_t const length = strlen(templine);
-        while(*templine < '0' || *templine > '9') {
-          ++templine;
+    #if defined(__EMSCRIPTEN__)
+      return 0;
+    #else
+      FILE *file = fopen("/proc/self/status", "r");
+      uint64_t result = 0;
+      char line[128];
+      while(fgets(line, 128, file) != NULL) {
+        if(strncmp(line, "VmSize:", 7) == 0) {
+          char *templine = line;
+          size_t const length = strlen(templine);
+          while(*templine < '0' || *templine > '9') {
+            ++templine;
+          }
+          templine[length - 3] = '\0';
+          result = static_cast<uint64_t>(std::atoll(templine)) * uint64_t{1024u}; // value is kilobytes
         }
-        templine[length - 3] = '\0';
-        result = std::atoll(templine) * uint64_t(1024);                         // value is kilobytes
       }
-    }
-    fclose(file);
-    return result;
+      fclose(file);
+      return result;
+    #endif // defined
   #elif defined(PLATFORM_MACOS)
     struct task_basic_info info;
     mach_msg_type_number_t info_count = TASK_BASIC_INFO_COUNT;
