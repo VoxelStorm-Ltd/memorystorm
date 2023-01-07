@@ -239,11 +239,11 @@ uint64_t get_virtual_usage() {
 std::string human_readable(uint64_t amount) {
   /// Helper function to convert a size in bytes to a human readable size
   std::stringstream ss;
-  uint64_t constexpr const kilobyte{1'024};
-  uint64_t constexpr const megabyte{kilobyte * 1'024};
-  uint64_t constexpr const gigabyte{megabyte * 1'024};
-  uint64_t constexpr const terabyte{gigabyte * 1'024};
-  uint64_t constexpr const petabyte{terabyte * 1'024};
+  uint64_t constexpr kilobyte{1'024};
+  uint64_t constexpr megabyte{kilobyte * 1'024};
+  uint64_t constexpr gigabyte{megabyte * 1'024};
+  uint64_t constexpr terabyte{gigabyte * 1'024};
+  uint64_t constexpr petabyte{terabyte * 1'024};
   if(amount < kilobyte) {
     ss << amount << "B";
   } else if(amount < kilobyte * 10) {
