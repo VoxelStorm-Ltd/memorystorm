@@ -3,7 +3,7 @@
 
 /// Functionality for querying operating system memory across all platforms
 
-#include <cstddef>
+#include <cstdint>
 #include <string>
 
 namespace memorystorm {
