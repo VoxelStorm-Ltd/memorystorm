@@ -7,6 +7,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(memorystorm memorystorm/memorystorm.cpp)
 target_include_directories(memorystorm PUBLIC memorystorm)
+if(WIN32)
+  target_link_libraries(memorystorm PRIVATE Psapi)
+endif()
 
 option(ENABLE_COVERAGE "Enable code coverage instrumentation" OFF)
 if(ENABLE_COVERAGE)

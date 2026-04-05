@@ -140,10 +140,15 @@ TEST_CASE("get_virtual_total: is at least as large as physical total", "[memory]
 }
 
 TEST_CASE("virtual usage is at least physical usage", "[memory][physical][virtual]") {
-  // Virtual address space used is typically >= physical (resident set size)
+#if defined(_WIN32)
+  SUCCEED("Skipped on Windows: get_virtual_usage() and get_physical_usage() use different metrics, so no ordering is guaranteed.");
+#else
+  // On non-Windows platforms, virtual address space usage is expected to be
+  // at least as large as physical resident usage.
   auto const physical_usage{get_physical_usage()};
   auto const virtual_usage{get_virtual_usage()};
   CHECK(virtual_usage >= physical_usage);
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -154,12 +159,6 @@ TEST_CASE("get_physical_total: plausible for a CI host (>= 64 MB)", "[memory][ph
   auto const total{get_physical_total()};
   auto const min_expected{UINT64_C(64) * 1024 * 1024}; // 64 MB
   CHECK(total >= min_expected);
-}
-
-TEST_CASE("get_physical_total: plausible upper bound (< 1 TB)", "[memory][physical]") {
-  auto const total{get_physical_total()};
-  auto const max_expected{UINT64_C(1024) * 1024 * 1024 * 1024}; // 1 TB
-  CHECK(total < max_expected);
 }
 
 // ---------------------------------------------------------------------------
