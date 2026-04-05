@@ -1,5 +1,8 @@
 # MemoryStorm
 
+[![Tests](https://github.com/VoxelStorm-Ltd/memorystorm/actions/workflows/tests.yml/badge.svg)](https://github.com/VoxelStorm-Ltd/memorystorm/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/VoxelStorm-Ltd/memorystorm/branch/main/graph/badge.svg)](https://codecov.io/gh/VoxelStorm-Ltd/memorystorm)
+
 Small and simple C++ memory use monitoring and reporting library by VoxelStorm.
 
 ## Core functions
