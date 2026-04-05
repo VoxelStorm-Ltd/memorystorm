@@ -37,3 +37,7 @@ void dump_stats();
 ```
 
 The `human_readable` function can be called on any numerical value representing a number of bytes, and will return a human readable value in kilobytes, megabytes, gigabytes, etc.
+
+## Dependencies
+
+- [`cast_if_required.h`](cast_if_required.h) — included in this repository at the top level. This is a shared VoxelStorm utility header providing safe type casts, shared across VoxelStorm projects (libvoxelstorm). When including memorystorm directly into your project, ensure `cast_if_required.h` is on your include path (e.g., by copying it alongside the `memorystorm/` directory).

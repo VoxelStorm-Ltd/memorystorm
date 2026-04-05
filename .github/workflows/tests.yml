@@ -18,10 +18,9 @@ jobs:
 
       - name: Configure
         run: >
-          cmake -B build
+          cmake -S tests -B build
           -DCMAKE_BUILD_TYPE=Debug
           -DENABLE_COVERAGE=ON
-          -DBUILD_TESTS=ON
 
       - name: Build
         run: cmake --build build --parallel $(nproc)
