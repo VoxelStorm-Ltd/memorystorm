@@ -38,9 +38,8 @@ jobs:
           lcov --remove coverage.info \
                '/usr/*' \
                '*/tests/*' \
-               '*/Catch2/*' \
-               '*/catch2/*' \
                '*/build/_deps/*' \
+               --ignore-errors unused \
                --output-file coverage.info
           lcov --list coverage.info
 
