@@ -40,4 +40,4 @@ The `human_readable` function can be called on any numerical value representing 
 
 ## Dependencies
 
-- [`cast_if_required.h`](cast_if_required.h) — included in this repository at the top level. This is a shared VoxelStorm utility header providing safe type casts, shared across VoxelStorm projects (libvoxelstorm). When including memorystorm directly into your project, ensure `cast_if_required.h` is on your include path (e.g., by copying it alongside the `memorystorm/` directory).
+- [`cast_if_required`](https://github.com/VoxelStorm-Ltd/cast_if_required) — a shared VoxelStorm utility header providing safe type casts, shared across VoxelStorm projects (libvoxelstorm). The test build fetches this automatically via CMake FetchContent. When including memorystorm directly into your project, ensure `cast_if_required.h` is on your include path.
