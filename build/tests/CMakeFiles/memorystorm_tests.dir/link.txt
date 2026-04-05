@@ -1,0 +1,1 @@
+/usr/bin/c++ -g --coverage -Wl,--dependency-file=CMakeFiles/memorystorm_tests.dir/link.d CMakeFiles/memorystorm_tests.dir/test_memorystorm.cpp.o -o memorystorm_tests  ../libmemorystorm.a ../_deps/catch2-build/src/libCatch2Maind.a ../_deps/catch2-build/src/libCatch2d.a
