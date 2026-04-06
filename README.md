@@ -1,5 +1,8 @@
 # MemoryStorm
 
+[![Tests](https://github.com/VoxelStorm-Ltd/memorystorm/actions/workflows/tests.yml/badge.svg)](https://github.com/VoxelStorm-Ltd/memorystorm/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/VoxelStorm-Ltd/memorystorm/branch/main/graph/badge.svg)](https://codecov.io/gh/VoxelStorm-Ltd/memorystorm)
+
 Small and simple C++ memory use monitoring and reporting library by VoxelStorm.
 
 ## Core functions
@@ -34,3 +37,7 @@ void dump_stats();
 ```
 
 The `human_readable` function can be called on any numerical value representing a number of bytes, and will return a human readable value in kilobytes, megabytes, gigabytes, etc.
+
+## Dependencies
+
+- [`cast_if_required`](https://github.com/VoxelStorm-Ltd/cast_if_required) - a small cross-platform cast helper (used on Windows builds only)
